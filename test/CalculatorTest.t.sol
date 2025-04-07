@@ -49,7 +49,7 @@ contract CalculatorTest is Test {
         uint256 number1_ = 100;
         uint256 number2_ = 10;
         vm.expectRevert("Not allowed - Only admin can call this function");
-        uint256 result_ = calc.division(number1_, number2_);
+        calc.division(number1_, number2_);
         vm.stopPrank();
     }
 
