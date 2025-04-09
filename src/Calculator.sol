@@ -36,7 +36,7 @@ contract Calculator {
         emit Substraction(number1_, number2_, result_);
     }
 
-    function multiplier(uint256 number1_, uint256 number2_) external returns(uint256 result_){
+    function multiplier(uint256 number1_, uint256 number2_) external onlyAdmin returns(uint256 result_){
         count++;
         result_ = number1_ * number2_;
         emit Multiplier(number1_, number2_, result_);

@@ -29,10 +29,21 @@ contract CalculatorTest is Test {
     }
 
     function testMultiplier() public {
+        vm.startPrank(admin);
         uint256 number1_ = 2;
         uint256 number2_ = 3;
         uint256 result_ = calc.multiplier(number1_, number2_);
         assertEq(result_, number1_ * number2_, "Multiplier failed");
+        vm.stopPrank();
+    }
+
+    function testMultiplierNotAllowed() public {
+        vm.startPrank(otherUser);
+        uint256 number1_ = 100;
+        uint256 number2_ = 10;
+        vm.expectRevert("Not allowed - Only admin can call this function");
+        calc.multiplier(number1_, number2_);
+        vm.stopPrank();
     }
 
     function testDivision() public {
@@ -67,6 +78,36 @@ contract CalculatorTest is Test {
     }
 
     //FUZZING TESTS
+    function testFuzzingAddition(uint256 number1_, uint256 number2_) public {
+        // Prevent overflow in addition
+        vm.assume(number2_ <= type(uint256).max - number1_);
+        uint256 result_ = calc.addition(number1_, number2_);
+        assertEq(result_, number1_ + number2_, "Addition failed");
+    }
+
+    function testFuzzingSubstraction(uint256 number1_, uint256 number2_) public {
+        // Prevent underflow in subtraction
+        vm.assume(number1_ >= number2_);
+        uint256 result_ = calc.substraction(number1_, number2_);
+        assertEq(result_, number1_ - number2_, "Substraction failed");
+    }
+
+    function testFuzzingMultiplier(uint256 number1_, uint256 number2_) public {
+        vm.startPrank(admin);
+        // Prevent overflow in multiplication
+        vm.assume(number2_ <= type(uint256).max / number1_);
+        uint256 result_ = calc.multiplier(number1_, number2_);
+        assertEq(result_, number1_ * number2_, "Multiplier failed");
+        vm.stopPrank();
+    }
+
+    function testFuzzingMultiplierNotAllowed(uint256 number1_, uint256 number2_) public {
+        vm.startPrank(otherUser);
+        vm.expectRevert("Not allowed - Only admin can call this function");
+        calc.multiplier(number1_, number2_);
+        vm.stopPrank();
+    }
+
     function testFuzzingDivision(uint256 number1_, uint256 number2_) public {
         vm.startPrank(admin);
         // Avoid division by zero
@@ -75,6 +116,14 @@ contract CalculatorTest is Test {
         assertEq(result_, number1_ / number2_, "Division failed");
         vm.stopPrank();
     }
+
+    function testFuzzingDivisionNotAllowed(uint256 number1_, uint256 number2_) public {
+        vm.startPrank(otherUser);
+        vm.expectRevert("Not allowed - Only admin can call this function");
+        calc.division(number1_, number2_);
+        vm.stopPrank();
+    }
+
 
     function testFuzzingCount(uint256 number1_, uint256 number2_) public {
         vm.startPrank(admin);
